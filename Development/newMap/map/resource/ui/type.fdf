@@ -1,0 +1,32 @@
+IncludeFile "UI\FrameDef\Glue\StandardTemplates.fdf",
+IncludeFile "UI\FrameDef\Glue\BattleNetTemplates.fdf",
+
+Frame "TEXTBUTTON" "ChooBlankButtonTemplatetA" {
+    ControlStyle "AUTOTRACK",
+}
+
+//背景模板
+Frame "BACKDROP" "panel" {
+	BackdropBackground  "Transparent.tga",
+	BackdropBlendAll,
+}
+//按钮模板
+Frame "GLUETEXTBUTTON" "button" {
+  SetAllPoints,
+}
+//字体
+Frame "TEXT" "text" {
+    LayerStyle "IGNORETRACKEVENTS",
+    FrameFont "resource\fonts\mtp.ttf", 10, "", 
+}
+
+
+Frame "SPRITE" "model" {
+    //BackgroundArt "HeroShadowHunter2.mdx",
+    //SetAllPoints,
+}
+
+   Frame "TEXT" "old_text" {
+        LayerStyle "IGNORETRACKEVENTS",
+        FrameFont "MasterFont", 1, "", 
+    }

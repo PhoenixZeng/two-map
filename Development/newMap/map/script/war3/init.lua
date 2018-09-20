@@ -1,0 +1,6 @@
+require 'war3.api'
+require 'war3.id'
+require 'war3.order_id'
+require 'ac'
+require 'war3.select'
+require 'war3.target_data'

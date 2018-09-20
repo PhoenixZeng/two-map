@@ -1,0 +1,11 @@
+事件
+    TriggerRegisterTimerEventSingle
+        常量: 1.00
+条件
+动作
+    CustomScriptCode
+        常量: 'call AbilityId("exec-lua:wenhao")'
+    FogEnable
+        预设: EnabledDisabledDisabled
+    FogMaskEnable
+        预设: EnabledDisabledDisabled

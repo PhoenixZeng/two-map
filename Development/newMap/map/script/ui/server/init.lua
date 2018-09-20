@@ -1,0 +1,5 @@
+require 'ui.server.bag'
+require 'ui.server.equipment'
+require 'ui.server.chat'
+require 'ui.server.taskbar'
+require 'ui.server.trigger'

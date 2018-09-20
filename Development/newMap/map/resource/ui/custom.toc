@@ -1,0 +1,3 @@
+resource\ui\type.fdf
+resource\ui\MyFrame.fdf
+resource\ui\type.fdf
