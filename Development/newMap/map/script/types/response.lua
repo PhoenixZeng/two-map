@@ -117,6 +117,7 @@ ac.game:event '玩家-注册英雄' (function(trg, player, hero)
 		response.play_sound('what', hero)
 	end)
 	hero:event '单位-发布指令' (function(_, _, order, target)
+		print('111111111111')
 		if order == 'smart' and target then
 			if target.type == 'unit' and target:is_enemy(hero) then
 				response.play_sound('attack', hero)

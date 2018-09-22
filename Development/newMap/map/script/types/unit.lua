@@ -1220,8 +1220,8 @@ local function init_unit(handle, p)
 	u:remove_ability 'Arav'
 
 	--忽略警戒点
-	jass.RemoveGuardPosition(u.handle)
-	jass.SetUnitCreepGuard(u.handle, true)
+	--jass.RemoveGuardPosition(u.handle)
+	--jass.SetUnitCreepGuard(u.handle, true)
 
 	--设置高度
 	u:set_high(u:get_slk('moveHeight', 0))
@@ -1749,7 +1749,7 @@ mt.loop = ac.uloop
 mt.timer = ac.utimer
 
 function unit.registerJassTriggers()
-	--单位发布指定目标事件
+	--[[--单位发布指定目标事件
 	local j_trg = war3.CreateTrigger(function()
 		local u = unit.j_unit(jass.GetTriggerUnit())
 		if not u then
@@ -1861,7 +1861,7 @@ function unit.registerJassTriggers()
 	end)
 	for i = 1, 13 do
 		jass.TriggerRegisterPlayerUnitEvent(j_trg, player[i].handle, jass.EVENT_PLAYER_UNIT_USE_ITEM, nil)
-	end
+	end]]
 end
 
 --保存地图上的预设单位
@@ -1885,16 +1885,17 @@ function unit.init()
 	unit.removed_units = setmetatable({}, { __mode = 'kv' })
 
 	--注册单位的jass事件
-	unit.registerJassTriggers()
+	--unit.registerJassTriggers()
 
 	--更新数据
 	unit.frame = 8
-
+--[[
 	ac.loop(1000 / unit.frame, function()
 		for _, u in pairs(unit.all_units) do
 			u:update()
 		end
 	end)
+	]]
 
 	--单位移除队列
 	unit.wait_to_remove_table1 = {}

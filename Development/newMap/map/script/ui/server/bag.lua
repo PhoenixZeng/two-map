@@ -586,7 +586,7 @@ for i=1,10 do
 end
 
 hero:add_restriction('无敌')
---[[
+
 local hero = ac.player(1):create_unit('Hpal',ac.point(400,300),30)
 bag.init_bag(hero)
 
@@ -599,7 +599,7 @@ for i=1,10 do
     hero:add_item('衣服',10)
 end
 
-local hero = ac.player(2):create_unit('Hpal',ac.point(400,300),30)
+local hero = ac.player(1):create_unit('Hpal',ac.point(400,300),30)
 hero:add_restriction('无敌')
 bag.init_bag(hero)
 
@@ -609,7 +609,7 @@ hero:add_item('衣服',10)
 for i=1,10 do
     hero:add_item('衣服',10)
 end
-]]
+
 
 --开一个计时器 发送玩家金钱给背包客户端
 

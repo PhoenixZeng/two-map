@@ -8,12 +8,24 @@ local texttag
 local mouse
 
 local player = {}
+
 setmetatable(player, player)
 ac.player = player
 
 function player:__tostring()
     return ('玩家%02d|%s|%s'):format(self.id, self.base_name, jass.GetPlayerName(self.handle))
 end
+
+local camera_state = {
+	['镜头距离'] 		= jass.CAMERA_FIELD_TARGET_DISTANCE,
+	['远景截断距离']	= jass.CAMERA_FIELD_FARZ,
+	['镜头区域']		= jass.CAMERA_FIELD_FIELD_OF_VIEW,
+	['x轴旋转角度']		= jass.CAMERA_FIELD_ANGLE_OF_ATTACK,
+	['y轴旋转角度']		= jass.CAMERA_FIELD_ROLL,
+	['z轴旋转角度']		= jass.CAMERA_FIELD_ROTATION,
+	['z轴偏移']		= jass.CAMERA_FIELD_ZOFFSET
+
+}
 
 local mt = {}
 player.__index = mt
@@ -327,14 +339,14 @@ end
 --	[持续时间]
 function mt:setCameraField(key, value, time)
 	if self == player.self then
-		jass.SetCameraField(jass[key], value, time or 0)
+		jass.SetCameraField(jass[key] or camera_state[key], value, time or 0)
 	end
 end
 
 --获取镜头属性
 --	镜头属性
 function mt:getCameraField(key)
-	return math.deg(jass.GetCameraField(jass[key]))
+	return math.deg(jass.GetCameraField(jass[key] or camera_state[key]))
 end
 
 --设置镜头目标

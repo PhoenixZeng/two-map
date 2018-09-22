@@ -8,8 +8,10 @@ require 'ui.base.edit'
 require 'ui.base.game'
 require 'ui.base.keyboard'
 dzapi.DzLoadToc("resource\\ui\\custom.toc")
-dzapi.DzFrameHideInterface()
-dzapi.DzFrameEditBlackBorders(0,0)
+--dzapi.DzFrameHideInterface()
+--dzapi.DzFrameEditBlackBorders(0,0)
+
 --japi.hide_interface(0)
 --FogEnable( false )
 --FogMaskEnableOff(  )
+
