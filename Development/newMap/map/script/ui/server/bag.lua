@@ -404,6 +404,29 @@ unit_method = {
         return self.bag[page_id][slot_id]
     end,
 
+    open_bag = function (unit)
+        local info = {
+            type = 'bag',
+            func_name = 'on_open_bag',
+            params = {
+                [1] = GetHandleId(unit.handle),
+            }
+        }
+        ui.send_message(unit:get_owner().handle,info)
+
+    end,
+
+
+    close_bag = function (unit)
+        local info = {
+            type = 'bag',
+            func_name = 'on_close_bag',
+        }
+        ui.send_message(unit:get_owner().handle,info)
+
+    end,
+
+
 
     add_item = function (unit,item_name,item_count)
         local tbl = unit:get_nil_slot(1) --获取一个空的槽位

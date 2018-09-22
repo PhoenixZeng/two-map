@@ -1,6 +1,8 @@
 local ui = require 'ui.server.util'
 local bag = require 'ui.server.bag'
 local trg = CreateTrigger()
+
+
 --注册同步事件
 dzapi.DzTriggerRegisterSyncData(trg,"ui",false)
 TriggerAddAction(trg,function ()
@@ -29,13 +31,37 @@ TriggerAddAction(trg,function ()
     end
 end)
 
---注册选择单位触发
+--注册选择单位触发 选择单位的时候 刷新背包
 trg = CreateTrigger()
 for i=0,11 do
     TriggerRegisterPlayerSelectionEventBJ(trg,Player(i),true)
 end
 TriggerAddAction(trg,function ()
-    
+    local unit = GetTriggerUnit()
+    local player = GetTriggerPlayer()
+    local group = GetUnitsSelectedAll(player)
+    local count = CountUnitsInGroup(group)
+    GroupClear(group)
+    DestroyGroup(group)
+
+    if count > 1 then 
+        local info = {
+            type = 'bag',
+            func_name = 'on_close_bag',
+        }
+        ui.send_message(player,info)
+        return 
+    end 
+    if GetOwningPlayer(unit) == player and IsUnitType(unit, UNIT_TYPE_HERO) then 
+        local info = {
+            type = 'bag',
+            func_name = 'on_select_unit',
+            params = {
+                [1] = GetHandleId(unit),
+            }
+        }
+        ui.send_message(player,info)
+    end 
 end)
 
 function register_item_destroy_event(item_handle)

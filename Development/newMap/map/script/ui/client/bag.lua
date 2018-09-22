@@ -48,7 +48,7 @@ item_class = {
     item_desc_map = {},
 
     --装备类型
-    equipment_type = {'武器','头盔','上衣','裤子','护手','鞋子','项链','玉佩','戒指','手镯'},
+    equipment_type = {'武器','头盔','衣服','裤子','护手','鞋子','项链','玉佩','戒指','手镯'},
 
     --单位 槽位 名字 数量
     create = function (unit,page_id,slot_id,name,count)
@@ -69,9 +69,8 @@ item_class = {
             return
         end
         
-        item.page_type = bag.ui.show_type
 
-        if page_id == unit.this_page then
+        if page_id == unit.this_page and unit == bag.ui.unit then
             item:set_icon(item:get_icon())
             item:set_count(item:get_count())
             button.texture:set_normal_image(item:get_type_icon())
@@ -107,7 +106,7 @@ item_class = {
         self.page_id = 0
         self.slot_id = 0
 
-       if page_id == self.unit.this_page then
+       if page_id == self.unit.this_page and self.unit == bag.ui.unit then
 
             button:set_normal_image('')
             button.texture:set_normal_image('')
@@ -173,7 +172,6 @@ item_class = {
     --设置随机属性 第index条随机属性 {属性名,数值}
     set_rand_state = function (self,index,value)
         self.rand_state[index] = value
-        ui.send_message(self.player,info)
     end,
 
     get_rand_state_table = function (self)
@@ -203,7 +201,7 @@ item_class = {
         if button == nil then
             return
         end
-        if self.page_id == self.unit.this_page then
+        if self.page_id == self.unit.this_page and self.unit == bag.ui.unit then
             button:set_normal_image(image_path)
         end
     end,
@@ -224,7 +222,7 @@ item_class = {
             return
         end
         self.count = count
-       if page_id == self.unit.this_page then
+       if page_id == self.unit.this_page and self.unit == bag.ui.unit then
             if self.count > 0 then 
                 button.text:set_text(tostring(self.count))
             else
@@ -247,7 +245,7 @@ item_class = {
         end
         self.enable = is_enable
    
-       if page_id ~= self.unit.this_page then 
+       if page_id ~= self.unit.this_page and self.unit ~= bag.ui.unit then 
             return
         end
         local alpha = 0.5 * 0xff -- 设置透明
@@ -265,7 +263,7 @@ item_class = {
 
     --改变物品位置 最后一个参数是 是否清除原位置的按钮图像
     set_position = function (self,page_id,slot_id,is_clean)
-        if self.page_id == self.unit.this_page and is_clean then
+        if self.page_id == self.unit.this_page and is_clean and self.unit == bag.ui.unit then
             local button = bag.ui.button_list[self.slot_id]
             button:set_normal_image('')
             button.texture:set_normal_image('')
@@ -273,7 +271,7 @@ item_class = {
             local page = self.unit:get_page(self.page_id)
             page[self.slot_id] = nil
         end
-        if page_id == self.unit.this_page then
+        if page_id == self.unit.this_page and self.unit == bag.ui.unit then
             local button = bag.ui.button_list[slot_id]
             button:set_normal_image(self:get_icon())
             button.texture:set_normal_image(self:get_type_icon())
@@ -432,6 +430,11 @@ bag_class = extends( panel_class , {
         return panel
     end,
 
+    --显示的时候刷新一下界面
+    show = function (self)
+        panel_class.show(self)
+        self:update_page(self.unit)
+    end,
 
     --隐藏背包的时候 顺带把出售面板按钮也隐藏掉
     hide = function (self)
@@ -893,26 +896,44 @@ bag.item_class = item_class
 bag.item_map = {}
 
 bag.event = {
+
+
+    on_select_unit = function (handle)
+        local unit = unit_class.get_object(handle)
+        bag.ui.unit = unit
+        --如果是显示的 刷新
+        if bag.ui.is_show then 
+            bag.ui:update_page(unit)
+        end 
+    end,
+
+    on_open_bag = function (handle)
+        local unit = unit_class.get_object(handle)
+        bag.ui.unit = unit
+        bag.ui:show()
+    end,
+
+    on_close_bag = function ()
+        bag.ui:hide()
+    end,
+
     on_init = function (handle)
         local unit = unit_class.get_object(handle)
-        equipment.ui.unit = unit
-        bag.ui.unit = unit
+        --equipment.ui.unit = unit
+        --bag.ui.unit = unit
     end,
     on_create = function (handle,name,count,page_id,slot_id)
         local unit = unit_class.get_object(handle)
-        bag.ui.unit = unit
         item_class.create(unit,page_id,slot_id,name,count)
     end,
     
     on_copy_create = function (handle,page_id,slot_id,item)
         local unit = unit_class.get_object(handle)
-        bag.ui.unit = unit
         item_class.copy_create(unit,page_id,slot_id,item)
     end,
 
     on_destroy = function (handle,item_handle)
         local unit = unit_class.get_object(handle) 
-        bag.ui.unit = unit
         local item = unit:get_item(page_id,slot_id)
         if item ~= nil then 
             item:destroy()
@@ -932,7 +953,6 @@ bag.event = {
         local unit = unit_class.get_object(handle)
         local item = unit:get_item(page_id,slot_id)
         if item ~= nil then 
-            bag.ui.unit = unit
             item:set_count(count)
         end
     end,
@@ -941,7 +961,6 @@ bag.event = {
         local unit = unit_class.get_object(handle)
         local item = unit:get_item(page_id,slot_id)
         if item ~= nil then 
-            bag.ui.unit = unit
             item:set_level(level)
         end
     end,
@@ -950,7 +969,6 @@ bag.event = {
         local unit = unit_class.get_object(handle)
         local item = unit:get_item(page_id,slot_id)
         if item ~= nil then 
-            bag.ui.unit = unit
             item:set_enable(enable)
         end
     end,
@@ -959,7 +977,6 @@ bag.event = {
         local unit = unit_class.get_object(handle)
         local item = unit:get_item(page_id,slot_id)
         if item ~= nil then 
-            bag.ui.unit = unit
             item:set_rand_state(index,value)
         end
     end,
@@ -968,7 +985,6 @@ bag.event = {
         local unit = unit_class.get_object(handle)
         local item = unit:get_item(page_id,slot_id)
         if item ~= nil then 
-            bag.ui.unit = unit
             item:set_rand_state_table(rand_state)
         end
     end,
@@ -977,7 +993,6 @@ bag.event = {
         local unit = unit_class.get_object(handle)
         local item = unit:get_item(page_id,slot_id)
         if item ~= nil then 
-            bag.ui.unit = unit
             item:set_buy_price(price)
         end
     end,
@@ -986,7 +1001,6 @@ bag.event = {
         local unit = unit_class.get_object(handle)
         local item = unit:get_item(page_id,slot_id)
         if item ~= nil then 
-            bag.ui.unit = unit
             item:set_sell_price(price)
         end
     end,
@@ -996,6 +1010,8 @@ bag.event = {
             bag.ui.gold_text:set_text(tostring(gold))
         end 
     end,
+
+
 }
 
 
@@ -1044,6 +1060,22 @@ bag.on_unit_clicked = function (unit_handle)
 end
 
 
+bag.on_key_down = function (code)
+    if code == KEY.TAB then 
+        if bag.ui.unit ~= nil then 
+            if bag.ui.is_show then 
+                bag.ui:hide()
+            else 
+                bag.ui:show()
+            end 
+           
+        end 
+    end 
+
+end 
+
+
+
 ui.register_event('bag',bag.event)
 game.register_event(bag)
 ui.bag = bag
@@ -1051,7 +1083,7 @@ ui.bag = bag
 local function initialize()
     local unit = unit_class.get_object(1)
     local object = bag_class.create(1200,200,6,7,74)
-    --object:hide()
+    object:hide()
  
     object.unit = unit
     bag.ui = object
