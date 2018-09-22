@@ -479,7 +479,7 @@ bag_class = extends( panel_class , {
         local path = "image\\背包\\bar_background.tga"
         
         --槽位背景
-        local slot_path = "image\\背包\\package-lattice-back-0.tga"
+        local slot_path = "image\\背包\\bar_item_Background_frame.tga"
         
        
         local panel = panel_class.create(path,x,y,520,720)
