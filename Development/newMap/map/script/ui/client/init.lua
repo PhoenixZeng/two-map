@@ -1,6 +1,6 @@
 require 'ui.client.util'
 require 'ui.client.bag'
 require 'ui.client.equipment'
-require 'ui.client.chat'
+--require 'ui.client.chat'
 require 'ui.client.taskbar'
 require 'ui.client.selectHero'

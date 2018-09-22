@@ -145,6 +145,7 @@ item_class = {
             local index = math.random(#list)
             local state = list[index]
             local data = state[2][level_type]
+           
             rand_state[#rand_state + 1] = {state[1],math.random(data[1],data[2])}
             table.remove(list,index)
         end
@@ -506,7 +507,7 @@ bag.init_bag = function (unit)
     }
     ui.send_message(unit:get_owner(),info)
 end
---[[
+
 local hero = ac.player(1):create_unit('Hpal',ac.point(300,300),30)
 bag.init_bag(hero)
 
@@ -520,7 +521,7 @@ for i=1,10 do
 end
 
 hero:add_restriction('无敌')
-
+--[[
 local hero = ac.player(1):create_unit('Hpal',ac.point(400,300),30)
 bag.init_bag(hero)
 

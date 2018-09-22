@@ -11,8 +11,9 @@ japi  = require 'jass.japi'
 game_ui     = dzapi.DzGetGameUI()
 game_width  = dzapi.DzGetWindowWidth()
 game_height = dzapi.DzGetWindowHeight()
-
+storm.save('ui\\loaded.fdf','')
 function load_fdf(data)
+    storm.save('ui\\loaded.fdf',storm.load('ui\\loaded.fdf') .. data)
     storm.save('ui\\Load.fdf',data)
     storm.save('ui\\Load.toc','ui\\Load.fdf\r\n')
     dzapi.DzLoadToc('ui\\Load.toc')
@@ -249,7 +250,7 @@ ui_base_class = {
     end,
 
     set_normal_image = function (self,image_path,flag)
-        if image_path == '' then 
+        if image_path == '' or storm.load(image_path) == nil then 
             image_path = 'Transparent.tga'
         end
         self.normal_image = image_path
@@ -286,6 +287,8 @@ ui_base_class = {
             for index,data in ipairs(tip) do
                 local title = data[1]
                 local desc = data[2]
+                local background = data[3] or ''
+                local image = data[4] or ''
                 local line = get_str_line(data[2],13*3-1)
                 local max_height = (line + 3) * 27
                 local ox = x + (index - 1) * (width + 50 ) * offset
@@ -297,7 +300,8 @@ ui_base_class = {
                 panel:set_alpha(0.8)
 
                 local text = panel:add_text(title,0,font_size,width,64,font_size,'top') 
-                
+                local icon_background = panel:add_texture(background,40,5,48,48)
+                local icon = panel:add_texture(image,40,5,48,48)
                 local text2 = panel:add_text(desc,32,64,width,max_height,font_size,'left')
                 text2:set_control_size(width-64,max_height)
                 table.insert(ui_base_class.tooltip_list,panel)
@@ -318,11 +322,16 @@ ui_base_class = {
             return 
         end
  
-        local tip = {}
+        local tbl = {}
         for i=1,#arg do
-            tip[#tip + 1] = arg[i]:get_tip()
+            local item          = arg[i]
+            local title         = item:get_title()
+            local tip           = item:get_tip()
+            local background    = item:get_type_icon()
+            local icon          = item:get_icon()
+            tbl[#tbl + 1]       = {title,tip,background,icon}
         end
-        ui_base_class.set_tooltip(self,tip,0,0,360,80,15,-1)
+        ui_base_class.set_tooltip(self,tbl,0,0,360,80,15,-1)
     end,
 
     get_this_class = function (self)

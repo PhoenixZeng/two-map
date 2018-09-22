@@ -4,7 +4,7 @@ require 'ui.base.panel'
 local font = [[
     Frame "TEXT" "text%d" {
         LayerStyle "IGNORETRACKEVENTS",
-        FrameFont "resource\fonts\mtp.ttf", %f, "", 
+        FrameFont "resource\fonts\mtp2.ttf", %f, "", 
     }
 ]]
 

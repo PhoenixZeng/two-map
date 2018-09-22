@@ -41,14 +41,6 @@ local item_type_color = {
     [5] = color_code['金'],
     [6] = color_code['红'],
 }
-local item_type_icon = {
-    [1] = 'image\\背包\\颜色\\白.tga',
-    [2] = 'image\\背包\\颜色\\绿.tga',
-    [3] = 'image\\背包\\颜色\\蓝.tga',
-    [4] = 'image\\背包\\颜色\\紫.tga',
-    [5] = 'image\\背包\\颜色\\金.tga',
-    [6] = 'image\\背包\\颜色\\红.tga',
-}
 
 
 item_class = {
@@ -90,6 +82,7 @@ item_class = {
         if bag.ui.show_type ~= '全部' then
             bag.ui:update_page(unit)
         end
+
         return item
     end,
 
@@ -98,6 +91,7 @@ item_class = {
         item:set_enable(old_item:is_enable())
         item:set_level(old_item:get_level())
         item:set_rand_state_table(old_item:get_rand_state_table())
+       
         return item
     end,
     
@@ -207,17 +201,11 @@ item_class = {
     end,
 
     get_icon = function (self)
-        local data = Table.ItemData[self.name]
-        if data == nil then 
-            return ''
-        end
         return 'image\\图标\\' .. Table.ItemData[self.name].IconName or ''
     end,
 
     get_type_icon = function (self)
-        local level = Table.ItemData[self.name].ItemLevel or 1
-
-        return item_type_icon[level] or ''
+        return 'image\\图标背景\\' .. Table.ItemData[self.name].IconBackground or ''
     end,
     set_count = function (self,count)
         local page_id = self.fake_page_id or self.page_id
@@ -335,7 +323,7 @@ item_class = {
             end
         end
         
-        return {self:get_title(),table.concat(s)}
+        return table.concat(s)
     end,
 }
 
@@ -353,9 +341,9 @@ action_bar_class = extends(panel_class,{
         panel.button_list = {}
         x = 15
         y = 0
-
+--[[
         for index,type in ipairs(info) do
-            local button = panel:add_button('image\\背包\\package-lattice-back-0.tga',x,y,120,48)
+            local button = panel:add_button('',x,y,120,48)
             button.text = button:add_text(type,0,8,120,33,18,4)
             button.type = type
             panel.button_map[type] = button
@@ -363,6 +351,7 @@ action_bar_class = extends(panel_class,{
             
             x = x + 125
         end
+        ]]
         
         setmetatable(panel,{__index=action_bar_class})
         panel:select_button('全部')
@@ -487,13 +476,13 @@ bag_class = extends( panel_class , {
         local max_width = row  * value + offset / 2
         local max_height = column * value + offset / 2
         --底层面板
-        local path = "image\\背包\\package-background.tga"
+        local path = "image\\背包\\bar_background.tga"
         
         --槽位背景
         local slot_path = "image\\背包\\package-lattice-back-0.tga"
         
        
-        local panel = panel_class.create(path,x,y,max_width,720)
+        local panel = panel_class.create(path,x,y,520,720)
         --禁止鼠标穿透
         panel:add_button('',0,0,panel.w,panel.h):set_enable(false)
 
@@ -501,13 +490,13 @@ bag_class = extends( panel_class , {
         extends(bag_class,panel)
 
         
-        local item_bar = panel:add_panel('',0,125,max_width,max_height)
+        local item_bar = panel:add_panel('',0,100,max_width,max_height)
         panel.button_list = {}
         panel.button_map = {}
         for i = 0 ,  column - 1 do
             for k = 0 , row - 1 do
-                local x = k * value
-                local y = i * value
+                local x = k * value + offset
+                local y = i * value + offset
                 --创建一个 槽位背景
                 local slot = item_bar:add_panel(slot_path,x,y,slot_size,slot_size)
 
@@ -536,11 +525,20 @@ bag_class = extends( panel_class , {
         panel.size = size
         panel.item_count = 0
         panel.item_max_count = row * column
+        --默认显示类型
+        panel.show_type = '全部'
+
         --创建一个可拖动的标题按钮
         panel.title_button = panel:add_title_button('','背包',0,0,panel.w,80,25)
 
+        --添加一个关闭按钮
+        panel.close_button = panel:add_close_button()
 
         local oy = item_bar.y + item_bar.h
+
+ --[[
+
+        
 
    
          --上一页按钮
@@ -552,14 +550,14 @@ bag_class = extends( panel_class , {
         panel.page_text:set_color(220,230,50,1)
         --下一页按钮
         panel.next_button = panel:add_next_page_button(173,oy,120,48)
-
+]]
         --整理背包按钮  排序
-        panel.sort_button = panel:add_sort_button(293,oy,120,48)
+        --panel.sort_button = panel:add_sort_button(293,oy,120,48)
 
 
         --创建一个分类的操作栏
         panel.action_bar = action_bar_class.create(panel)
-
+        
         return panel
     end,
     
@@ -1116,8 +1114,8 @@ ui.bag = bag
 
 local function initialize()
     local unit = unit_class.get_object(1)
-    local object = bag_class.create(1200,200,5,5,96)
-    object:hide()
+    local object = bag_class.create(1200,200,6,7,74)
+    --object:hide()
  
     object.unit = unit
     bag.ui = object
