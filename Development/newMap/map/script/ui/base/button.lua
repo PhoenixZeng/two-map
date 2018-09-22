@@ -207,7 +207,7 @@ button_class = extends( panel_class,{
     on_button_update_drag = function (self,icon,x,y)
         print('拖拽更新事件',tostring(self),tostring(icon),x,y)
     end,]]
-    
+
 })
 
 local mt = getmetatable(button_class)

@@ -145,25 +145,38 @@ panel_class = extends( ui_base_class,{
 
         local button = self:add_button('image\\背包\\bar_CloseButton_normal.tga',x,y,width,height)
 
-
         --左键按下 修改图片
         button.on_button_mousedown = function (self)
             self:set_normal_image('image\\背包\\bar_CloseButton_Press.tga')
+            return false
         end
 
         --左键弹起 恢复图片
         button.on_button_mouseup = function (self)
             self:set_normal_image('image\\背包\\bar_CloseButton_normal.tga')
+            return false
+        end--左键按下 修改图片
+        button.on_button_mousedown = function (self)
+            self:set_normal_image('image\\背包\\bar_CloseButton_Press.tga')
+            return false
+        end
+
+        --左键弹起 恢复图片
+        button.on_button_mouseup = function (self)
+            self:set_normal_image('image\\背包\\bar_CloseButton_normal.tga')
+            return false
         end
 
         --按钮点击关闭
         button.on_button_clicked = function (self)
             self.parent:hide()
+            return false 
         end 
         --按钮文本提示
-        --button.on_button_mouse_enter = function (self)
-        --    ui_base_class.set_tooltip(self,"关闭",0,0,200,32,16) 
-        --end 
+        button.on_button_mouse_enter = function (self)
+            ui_base_class.set_tooltip(self,"关闭",0,0,240,64,16) 
+            return false 
+        end 
         return button
     end,
 

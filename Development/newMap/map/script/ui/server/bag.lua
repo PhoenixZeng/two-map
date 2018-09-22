@@ -66,7 +66,7 @@ item_class = {
             }
         }
         ui.send_message(self.player,info)
-        self.unit:get_bag()[page_id][slot_id] = nil
+        self.unit:get_bag()[self.page_id][self.slot_id] = nil
         
     end,
 
@@ -80,6 +80,51 @@ item_class = {
             return ''
         end
         return data.ItemType
+    end,
+    
+    --获取购买价格
+    get_buy_price = function (self)
+        return self.buy_price or Table.ItemData[self.name].BuyPrice or 0
+    end,
+    
+    set_buy_price = function (self,value)
+        self.buy_price = value
+
+        local info = {
+            type = 'bag',
+            func_name = 'on_set_buy_price',
+            params = {
+                [1] = GetHandleId(self.unit.handle),
+                [2] = self.page_id,
+                [3] = self.slot_id,
+                [4] = self.buy_price,
+            }
+        }
+        ui.send_message(self.player,info)
+
+    end,
+
+    
+    --获取出售价格
+    get_sell_price = function (self)
+        return self.sell_price or Table.ItemData[self.name].SellPrice or 0
+    end,
+    
+    --设置出售价格
+    set_sell_price = function (self,value)
+        self.sell_price = value 
+
+        local info = {
+            type = 'bag',
+            func_name = 'on_set_sell_price',
+            params = {
+                [1] = GetHandleId(self.unit.handle),
+                [2] = self.page_id,
+                [3] = self.slot_id,
+                [4] = self.sell_price,
+            }
+        }
+        ui.send_message(self.player,info)
     end,
     
     get_count = function (self)
@@ -300,6 +345,26 @@ bag.event = {
         register_item_destroy_event(item_handle)
     end,
 
+    sell_item = function (unit_handle,page_id,slot_id)
+        local unit = bag.unit_map[unit_handle]
+        if unit == nil then 
+            print('出售物品失败 没有单位')
+            return 
+        end 
+        local item = unit:get_item(page_id,slot_id)
+        if item == nil then 
+            print('出售物品失败 没有物品')
+            return 
+        end
+        print(ui.player,'出售',item:get_name())
+        local price = item:get_sell_price()
+
+        AdjustPlayerStateBJ( price, ui.player, PLAYER_STATE_RESOURCE_GOLD)
+        item:destroy()
+
+    end,
+
+
     show_bag_page = function (unit_handle,page_id)
         local unit = bag.unit_map[unit_handle]
         if unit == nil then 
@@ -492,7 +557,7 @@ bag.init_bag = function (unit)
     bag.unit_map[GetHandleId(unit.handle)] = unit
   
     unit.this_page = 1      --当前页面 初始为 1
-    unit.max_page = 3       --最大页面 
+    unit.max_page = 1       --最大页面 
     unit.max_slot = 25      --槽位数量
     unit.bag = {}
     for i = unit.this_page,unit.max_page do
@@ -545,6 +610,25 @@ for i=1,10 do
     hero:add_item('衣服',10)
 end
 ]]
+
+--开一个计时器 发送玩家金钱给背包客户端
+
+local timer = CreateTimer()
+TimerStart(timer,0.5,true,function ()
+    for i = 0,11 do 
+        local player = Player(i)
+        local gold = GetPlayerState(player, PLAYER_STATE_RESOURCE_GOLD)
+
+        local info = {
+            type = 'bag',
+            func_name = 'on_update_gold',
+            params = {
+                [1] = gold,
+            }
+        }
+        ui.send_message(player,info)
+    end 
+end)
 
 
 

@@ -79,9 +79,6 @@ item_class = {
 
         unit.bag[page_id][slot_id] = item
 
-        if bag.ui.show_type ~= '全部' then
-            bag.ui:update_page(unit)
-        end
 
         return item
     end,
@@ -96,8 +93,8 @@ item_class = {
     end,
     
     destroy = function (self)
-        local page_id = self.fake_page_id or self.page_id
-        local slot_id = self.fake_slot_id or self.slot_id
+        local page_id = self.page_id
+        local slot_id = self.slot_id
 
         local button = bag.ui.button_list[slot_id]
         if button == nil then
@@ -110,23 +107,13 @@ item_class = {
         self.page_id = 0
         self.slot_id = 0
 
-        self.fake_page_id = 0
-        self.fake_slot_id = 0
-
-        if self.page_type ~= bag.ui.show_type then 
-            return 
-        end
-
-        if page_id == self.unit.this_page then
+       if page_id == self.unit.this_page then
 
             button:set_normal_image('')
             button.texture:set_normal_image('')
             button.text:set_text('')
         end
 
-        if bag.ui.show_type ~= '全部' then
-            bag.ui:update_page(self.unit)
-        end
     end,
 
     get_name = function (self)
@@ -140,6 +127,27 @@ item_class = {
         end
         return data.ItemType
     end,
+
+
+    --获取购买价格
+    get_buy_price = function (self)
+        return self.buy_price or Table.ItemData[self.name].BuyPrice or 0
+    end,
+
+    set_buy_price = function (self,value)
+        self.buy_price = value
+    end,
+
+    --获取出售价格
+    get_sell_price = function (self)
+        return self.sell_price or Table.ItemData[self.name].SellPrice or 0
+    end,
+
+    --设置出售价格
+    set_sell_price = function (self,value)
+        self.sell_price = value 
+    end,
+
     set_level = function (self,level)
         self.level = level 
     end,    
@@ -208,18 +216,15 @@ item_class = {
         return 'image\\图标背景\\' .. Table.ItemData[self.name].IconBackground or ''
     end,
     set_count = function (self,count)
-        local page_id = self.fake_page_id or self.page_id
-        local slot_id = self.fake_slot_id or self.slot_id
+        local page_id = self.page_id
+        local slot_id = self.slot_id
 
         local button = bag.ui.button_list[slot_id]
         if button == nil then
             return
         end
         self.count = count
-        if self.page_type ~= bag.ui.show_type then 
-            return
-        end
-        if page_id == self.unit.this_page then
+       if page_id == self.unit.this_page then
             if self.count > 0 then 
                 button.text:set_text(tostring(self.count))
             else
@@ -233,8 +238,8 @@ item_class = {
     end,
 
     set_enable = function (self,is_enable)
-        local page_id = self.fake_page_id or self.page_id
-        local slot_id = self.fake_slot_id or self.slot_id
+        local page_id = self.page_id
+        local slot_id = self.slot_id
 
         local button = bag.ui.button_list[slot_id]
         if button == nil then
@@ -242,11 +247,7 @@ item_class = {
         end
         self.enable = is_enable
    
-        if self.page_type ~= bag.ui.show_type then 
-            return
-        end
-
-        if page_id ~= self.unit.this_page then 
+       if page_id ~= self.unit.this_page then 
             return
         end
         local alpha = 0.5 * 0xff -- 设置透明
@@ -329,141 +330,6 @@ item_class = {
 
 
 
-action_bar_class = extends(panel_class,{
-    create = function (parent_object)
-        local x = parent_object.item_bar.x
-        local y = parent_object.item_bar.y - 50
-        local panel = parent_object:add_panel('',x,y,32,32)
-        local info = {
-            '全部','装备','消耗品','杂类'
-        }
-        panel.button_map = {}
-        panel.button_list = {}
-        x = 15
-        y = 0
---[[
-        for index,type in ipairs(info) do
-            local button = panel:add_button('',x,y,120,48)
-            button.text = button:add_text(type,0,8,120,33,18,4)
-            button.type = type
-            panel.button_map[type] = button
-            table.insert(panel.button_list,button)
-            
-            x = x + 125
-        end
-        ]]
-        
-        setmetatable(panel,{__index=action_bar_class})
-        panel:select_button('全部')
-        return panel
-    end,
-    
-    show_bag_type_item = function (self,type)
-        local unit = self.parent.unit
-        if unit == nil then 
-            return 
-        end
-        local new_bag = {}
-        local item_list = {}
-        local boolxper = nil
-        if type == '全部' and self.bag ~= nil then
-            unit.bag = self.bag
-            unit.fake_bag = nil
-            for page_id,page in pairs(self.bag) do
-                for slot_id,item in pairs(page) do
-                    item.page_type = '全部'
-                    item.fake_page_id = nil
-                    item.fake_slot_id = nil
-                end
-            end
-            return
-        elseif self.bag == nil then
-            self.bag = unit.bag
-        end
-        if type == '装备' then
-            boolxper = function (item)
-                return item:is_equipment() or item:get_type() == '装备'
-            end
-        else 
-            boolxper = function (item,type) 
-                return item:get_type() == type 
-            end
-        end 
-            
-        if boolxper == nil then 
-            return 
-        end
-        
-        for page_id,page in pairs(self.bag) do
-            for slot_id,item in pairs(page) do
-                if boolxper(item,type) == true then
-                    item.page_type = type
-                    table.insert(item_list,item)
-                end
-            end
-        end
-        table.sort(item_list,function (a,b)
-            return a.name < b.name
-        end)
-     
-        local page = {}
-        local slot_id = 0
-        table.insert(new_bag,page)
-
-        for index,item in ipairs(item_list) do
-            slot_id = slot_id + 1
-            table.insert(page,item)
-            item.fake_page_id = #new_bag
-            item.fake_slot_id = slot_id
-
-            if slot_id == self.parent.item_max_count then
-                slot_id = 0
-                page = {}
-                table.insert(new_bag,page)
-            end
-        end
-        unit.fake_bag = new_bag
-    end,
-
-    select_button = function (self,type)
-        local button = self.button_map[type]
-        if button == nil then 
-            return
-        end
-        local x = 0
-        for index,object in ipairs(self.button_list) do
-            if object == button then
-                button:set_normal_image('image\\背包\\package-lattice-Highlight.tga')
-            else
-                object:set_normal_image('image\\背包\\package-lattice-back-0.tga')
-            end
-        end
-        
-        self.parent.show_type = type
-        local unit = self.parent.unit
-        if unit == nil then 
-            self.last_select_type = type
-            return 
-        end
-        if self.last_select_type == '全部' and type ~= '全部' then
-            self.bag = unit.bag
-        end
-        self:show_bag_type_item(type)
-        self.parent:show_bag_page(unit,1)
-        self.last_select_type = type
-        
-    end,
-
-    on_button_clicked = function (self,button)
-        if self.last_select_type == button.type then
-            return false
-        end 
-        self:select_button(button.type)
-        return false --事件截断
-    end,
-    
-})
-
 bag_class = extends( panel_class , {
 
     create = function (x,y,row,column,size)
@@ -479,10 +345,10 @@ bag_class = extends( panel_class , {
         local path = "image\\背包\\bar_background.tga"
         
         --槽位背景
-        local slot_path = "image\\背包\\bar_item_Background_frame.tga"
+        local slot_path = "image\\背包\\package-lattice-back-0.tga"
         
        
-        local panel = panel_class.create(path,x,y,520,720)
+        local panel = panel_class.create(path,x,y,520,760)
         --禁止鼠标穿透
         panel:add_button('',0,0,panel.w,panel.h):set_enable(false)
 
@@ -525,8 +391,8 @@ bag_class = extends( panel_class , {
         panel.size = size
         panel.item_count = 0
         panel.item_max_count = row * column
-        --默认显示类型
-        panel.show_type = '全部'
+
+
 
         --创建一个可拖动的标题按钮
         panel.title_button = panel:add_title_button('','背包',0,0,panel.w,80,25)
@@ -534,13 +400,9 @@ bag_class = extends( panel_class , {
         --添加一个关闭按钮
         panel.close_button = panel:add_close_button()
 
-        local oy = item_bar.y + item_bar.h
+        local oy = item_bar.y + item_bar.h + 15
 
  --[[
-
-        
-
-   
          --上一页按钮
         panel.previous_button = panel:add_previous_page_button(10,oy,120,48)
         
@@ -551,14 +413,61 @@ bag_class = extends( panel_class , {
         --下一页按钮
         panel.next_button = panel:add_next_page_button(173,oy,120,48)
 ]]
+
+        --出售物品按钮 
+        panel.sell_button = panel:add_sell_button(240,oy,120,48)
+        
         --整理背包按钮  排序
-        --panel.sort_button = panel:add_sort_button(293,oy,120,48)
+        panel.sort_button = panel:add_sort_button(380,oy,120,48)
 
 
-        --创建一个分类的操作栏
-        panel.action_bar = action_bar_class.create(panel)
+        --玩家金钱按钮 还有文本
+        local gold_icon = panel:add_texture('image\\背包\\bar_glod_lcon.tga',20,oy,32,32)
+        local gold_text = panel:add_text('0',70,oy,200,32,12,'left')
+        gold_text:set_color(220,230,50,1)
+
+        panel.gold_text = gold_text
+        
         
         return panel
+    end,
+
+
+    --隐藏背包的时候 顺带把出售面板按钮也隐藏掉
+    hide = function (self)
+        panel_class.hide(self)
+        self.sell_panel_button:hide()
+    end,
+
+    --添加一个出售按钮 点击显示出一块面板 用来出售物品
+    add_sell_button = function (self,x,y,width,height)
+        local path = "image\\背包\\package-lattice-back-0.tga"
+        local button = self:add_button(path,x,y,width,height)
+        button:add_text('出售',0,2,width,height,12,'center')
+
+        local sell_panel = self:add_button('image\\背包\\bar_drag_frame.tga',-280,self.h / 2 - 200,250,400)
+        sell_panel:add_text('拖\n\n拽\n\n到\n\n此\n\n处\n\n出\n\n售',sell_panel.w / 2 - 16,40,32,300,12,'center')
+        --按钮点击
+        sell_panel:hide()
+
+        self.sell_panel_button = sell_panel
+        button.panel = sell_panel
+
+        button.on_button_clicked = function (self)
+            if self.panel.is_show then 
+                self.panel:hide()
+            else 
+                self.panel:show()
+            end 
+            return false 
+        end 
+        --按钮文本提示
+        button.on_button_mouse_enter = function (self)
+            self:set_tooltip("可以出售身上的物品",0,0,240,64,16) 
+            return false 
+        end 
+        return button
+
     end,
     
 
@@ -567,6 +476,7 @@ bag_class = extends( panel_class , {
         local path = "image\\背包\\package-lattice-back-0.tga"
         local button = self:add_button(path,x,y,width,height)
         button:add_text('整理',0,2,width,height,12,'center')
+
         --按钮点击
         button.on_button_clicked = function (self)
             local object = self.parent
@@ -583,6 +493,7 @@ bag_class = extends( panel_class , {
         end 
         return button
     end,
+
     --添加下一页按钮
     add_next_page_button = function (self,x,y,width,height)
         local path = "image\\背包\\package-lattice-back-0.tga"
@@ -631,7 +542,6 @@ bag_class = extends( panel_class , {
 
 
     update_page = function (self,unit)
-        self.action_bar:show_bag_type_item(self.show_type)
         local page = unit:get_show_page()
         for index,button in ipairs(self.button_list) do
             local item = page[button.slot_id]
@@ -673,16 +583,13 @@ bag_class = extends( panel_class , {
         elseif page_id == unit.max_page then
             next_bool = false
         end
-        self.previous_button:set_enable(prev_bool)
-        self.next_button:set_enable(next_bool)
-        self.page_text:set_text(page_id)
+        --self.previous_button:set_enable(prev_bool)
+        --self.next_button:set_enable(next_bool)
+        --self.page_text:set_text(page_id)
 
 
         self:update_page(unit)
 
-        if self.show_type ~= '全部' then
-            return 
-        end 
 
         local info = {
             type = 'bag',
@@ -785,7 +692,6 @@ bag_class = extends( panel_class , {
         
         ui.send_message(info)
 
-        self.action_bar:select_button('全部')
         self:show_bag_page(self.unit,1) --整理背包后 切回第一页
     end,
 
@@ -856,9 +762,28 @@ bag_class = extends( panel_class , {
 
             --('拖到无关的按钮里了')
 
+
+             --拖拽到出售面板按钮上了
+             if target_button == self.sell_panel_button then 
+
+                local info = {
+                    type = 'bag',
+                    func_name = 'sell_item',
+                    params = {
+                        [1] = source_item.unit.handle,
+                        [2] = source_item.page_id,
+                        [3] = source_item.slot_id,
+                    }
+                }
+                ui.send_message(info)
+                --删除客户端物品 并给服务端发消息  通知那边出售物品
+                source_item:destroy()
+            end 
+
+  
         else 
             --交换
-
+            
             local x,y = ui.get_mouse_pos()
             if equipment.ui ~= nil and equipment.ui.is_show == true and equipment.ui:point_in_rect(x,y) then --判断装备栏是否显示
                 --判断拖动的位置 是否在装备栏里
@@ -872,9 +797,6 @@ bag_class = extends( panel_class , {
                 return
             end
 
-            if self.show_type ~= '全部' then
-                return
-            end
 
             local target_slot = target_button.slot_id
             local target_item = page[target_slot]
@@ -965,16 +887,6 @@ bag_class = extends( panel_class , {
         end
     end,
 
---[[
-    --按下事件
-    on_button_mousedown = function (self,button)
-        print('按下',self,button)
-    end,
-
-    --弹起事件
-    on_button_mouseup = function (self,button)
-        print('弹起',self,button)
-    end,]]
 })
 bag.item_class = item_class
 
@@ -1059,6 +971,30 @@ bag.event = {
             bag.ui.unit = unit
             item:set_rand_state_table(rand_state)
         end
+    end,
+
+    on_set_buy_price = function (handle,page_id,slot_id,price)
+        local unit = unit_class.get_object(handle)
+        local item = unit:get_item(page_id,slot_id)
+        if item ~= nil then 
+            bag.ui.unit = unit
+            item:set_buy_price(price)
+        end
+    end,
+
+    on_set_sell_price = function (handle,page_id,slot_id,price)
+        local unit = unit_class.get_object(handle)
+        local item = unit:get_item(page_id,slot_id)
+        if item ~= nil then 
+            bag.ui.unit = unit
+            item:set_sell_price(price)
+        end
+    end,
+
+    on_update_gold = function (gold)
+        if bag.ui ~= nil then 
+            bag.ui.gold_text:set_text(tostring(gold))
+        end 
     end,
 }
 

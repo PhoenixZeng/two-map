@@ -289,6 +289,7 @@ ui_base_class = {
                 local desc = data[2]
                 local background = data[3] or ''
                 local image = data[4] or ''
+                local price = data[5]
                 local line = get_str_line(data[2],13*3-1)
                 local max_height = (line + 3) * 27
                 local ox = x + (index - 1) * (width + 50 ) * offset
@@ -302,7 +303,13 @@ ui_base_class = {
                 local text = panel:add_text(title,0,font_size,width,64,font_size,'top') 
                 local icon_background = panel:add_texture(background,40,5,48,48)
                 local icon = panel:add_texture(image,40,5,48,48)
-                local text2 = panel:add_text(desc,32,64,width,max_height,font_size,'left')
+                local y = 64
+                --如果物品价格大于0 则显示金钱图标 + 物品价格
+                if price > 0 then 
+                    local gold_icon = panel:add_texture('image\\背包\\jinbi.tga',220,y,32,32)
+                    local gold_text = panel:add_text(tostring(price),260,y,200,32,12,'left')
+                end 
+                local text2 = panel:add_text(desc,32,y,width,max_height,font_size,'left')
                 text2:set_control_size(width-64,max_height)
                 table.insert(ui_base_class.tooltip_list,panel)
             end
@@ -329,7 +336,8 @@ ui_base_class = {
             local tip           = item:get_tip()
             local background    = item:get_type_icon()
             local icon          = item:get_icon()
-            tbl[#tbl + 1]       = {title,tip,background,icon}
+            local price         = item:get_sell_price()
+            tbl[#tbl + 1]       = {title,tip,background,icon,price}
         end
         ui_base_class.set_tooltip(self,tbl,0,0,360,80,15,-1)
     end,

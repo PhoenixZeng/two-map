@@ -17,7 +17,7 @@ unit_class = {
             self.handle = handle
 
             self.this_page = 1      --当前页面 初始为 1
-            self.max_page = 3       --最大页面 
+            self.max_page = 1       --最大页面 
             self.max_slot = 25      --槽位数量
             self.bag = {}
             for i = self.this_page,self.max_page do
