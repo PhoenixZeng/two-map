@@ -52,7 +52,7 @@ button_class = extends( panel_class,{
         ui.button_map[ui.id] = ui
         ui:set_position(x,y)
         ui:set_control_size(width,height)
-
+        dzapi.DzFrameSetEnable(ui.id,false)
         return ui
     end,
 
@@ -114,7 +114,7 @@ button_class = extends( panel_class,{
 
         ui:set_position(x,y)
         ui:set_control_size(width,height)
-  
+        dzapi.DzFrameSetEnable(ui.id,false)
         return ui
     end,
 
