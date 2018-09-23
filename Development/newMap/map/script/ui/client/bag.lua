@@ -288,7 +288,21 @@ item_class = {
     end,
 
     get_title = function (self)
-        return self:get_name()
+        local my_item = equipment.ui.item_map[self:get_type()]
+        local color = item_type_color[self:get_level_type()]
+        local s = {}
+
+        if color ~= nil then 
+            s[#s + 1] = '|cff' .. color 
+        end 
+        s[#s + 1] = self:get_name()
+        if color ~= nil then 
+            s[#s + 1] = '|r'
+        end 
+        if my_item == self then 
+            s[#s + 1] = '|cff00ff00(已装备)|r'
+        end 
+        return table.concat(s)
     end,
 
     get_tip = function (self)
@@ -843,7 +857,10 @@ bag_class = extends( panel_class , {
         if item == nil then
             return
         end
-        button:item_tooltip(item)
+
+      
+        local my_item = equipment.ui.item_map[item:get_type()]
+        button:item_tooltip(item,my_item)
         
         --print('鼠标进入',tostring(self))
     end,
@@ -888,6 +905,15 @@ bag_class = extends( panel_class , {
             end
             equipment.ui:add_item(item)
         end
+
+        local item2 = page[slot_id]
+        --如果没有卸下来的物品 就清空物品提示 如果有 则显示 卸下来的物品 跟 装备上的物品
+        if item2 == nil then
+            ui_base_class.remove_tooltip()
+        else 
+            button:item_tooltip(item2,item)
+        end
+
     end,
 
 })
@@ -1023,7 +1049,8 @@ end
 bag.on_item_mouse_enter = function (item_handle)
     local item = bag.item_map[GetHandleId(item_handle)] 
     if item ~= nil then 
-        ui_base_class.item_tooltip(nil,item)
+        local my_item = equipment.ui.item_map[item:get_type()]
+        ui_base_class.item_tooltip(nil,item,my_item)
     end
 end 
 

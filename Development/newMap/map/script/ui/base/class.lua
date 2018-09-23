@@ -317,9 +317,13 @@ ui_base_class = {
     end,
 
     remove_tooltip = function ()
-        for index,control in ipairs(ui_base_class.tooltip_list) do 
-            control:destroy()
-            table.remove(ui_base_class.tooltip_list,index)
+        local count = #ui_base_class.tooltip_list
+        for i = 1,count do 
+            local control = ui_base_class.tooltip_list[1]
+            if control ~= nil then 
+                control:destroy()
+            end 
+            table.remove(ui_base_class.tooltip_list,1)
         end
     end,
 
