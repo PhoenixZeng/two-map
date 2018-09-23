@@ -1,5 +1,5 @@
 local ui    = require 'ui.client.util'
-
+local game  = require 'ui.base.game'
 
 local equipment = {}
 local equipment_bar_class
@@ -328,11 +328,44 @@ equipment_bar_class = extends( panel_class , {
     
 })
 
+
+
 equipment.event = {
 
 }
 
+
+
+local ALT = false 
+
+equipment.on_key_down = function (code)
+
+    if code == KEY.ALT then 
+        ALT = true 
+    end 
+    if code == KEY.R and ALT then 
+        if equipment.ui.unit ~= nil then 
+            if equipment.ui.is_show then 
+                equipment.ui:hide()
+            else 
+                equipment.ui:show()
+            end 
+           
+        end
+    end 
+
+end 
+
+equipment.on_key_up = function (code)
+    if code == KEY.ALT then 
+        ALT = false 
+    end 
+end 
+
+
+
 ui.register_event('equipment',equipment.event)
+game.register_event(equipment)
 
 ui.equipment = equipment
 local function initialize()

@@ -1102,9 +1102,14 @@ bag.on_unit_clicked = function (unit_handle)
     end
 end
 
+local ALT = false 
 
 bag.on_key_down = function (code)
-    if code == KEY.TAB then 
+
+    if code == KEY.ALT then 
+        ALT = true 
+    end 
+    if code == KEY.E and ALT then 
         if bag.ui.unit ~= nil then 
             if bag.ui.is_show then 
                 bag.ui:hide()
@@ -1112,12 +1117,16 @@ bag.on_key_down = function (code)
                 bag.ui:show()
             end 
            
-        end 
+        end
     end 
 
 end 
 
-
+bag.on_key_up = function (code)
+    if code == KEY.ALT then 
+        ALT = false 
+    end 
+end 
 
 ui.register_event('bag',bag.event)
 game.register_event(bag)

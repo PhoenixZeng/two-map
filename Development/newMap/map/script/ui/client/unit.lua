@@ -10,23 +10,25 @@ unit_class = {
         if handle == nil then
             return
         end
-        local self = unit_class.unit_map[handle]
-        if self == nil then
-            self = {}
-            unit_class.unit_map[handle] = self
-            self.handle = handle
-
-            self.this_page = 1      --当前页面 初始为 1
-            self.max_page = 1       --最大页面 
-            self.max_slot = 42      --槽位数量
-            self.bag = {}
-            self.equipment = {}
-            for i = self.this_page,self.max_page do
-                self.bag[i] = {}
+        local unit = unit_class.unit_map[handle]
+        if unit == nil then
+            unit = {
+                handle = handle,    --单位局部
+                this_page  = 1,      --当前页面 初始为 1
+                max_page   = 1,      --最大页面 
+                max_slot   = 42,     --槽位数量
+                bag        = {},     --背包
+                equipment  = {},     --装备
+                state      = {},     --属性
+            }
+            unit_class.unit_map[handle] = unit
+  
+            for i = unit.this_page,unit.max_page do
+                unit.bag[i] = {}
             end 
-            setmetatable(self,{__index = unit_class})
+            setmetatable(unit,{__index = unit_class})
         end
-        return self
+        return unit
     end,
 
     get_bag = function (self)
