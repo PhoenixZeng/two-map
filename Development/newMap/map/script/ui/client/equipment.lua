@@ -14,20 +14,20 @@ local type_table = {
 
 
 local type_icon = {
-    ['项链'] = 'image\\背包\\装备\\项链.tga',
-    ['手镯'] = 'image\\背包\\装备\\手镯.tga',
-    ['头盔'] = 'image\\背包\\装备\\头盔.tga',
-    ['武器'] = 'image\\背包\\装备\\武器.tga',
-    ['衣服'] = 'image\\背包\\装备\\衣服.tga',
-    ['裤子'] = 'image\\背包\\装备\\裤子.tga',
-    ['护手'] = 'image\\背包\\装备\\护手.tga',
-    ['鞋子'] = 'image\\背包\\装备\\鞋子.tga',
+    ['项链'] = 'image\\装备栏\\项链.tga',
+    ['手镯'] = 'image\\装备栏\\手镯.tga',
+    ['头盔'] = 'image\\装备栏\\头盔.tga',
+    ['武器'] = 'image\\装备栏\\武器.tga',
+    ['衣服'] = 'image\\装备栏\\衣服.tga',
+    ['裤子'] = 'image\\装备栏\\裤子.tga',
+    ['护手'] = 'image\\装备栏\\护手.tga',
+    ['鞋子'] = 'image\\装备栏\\鞋子.tga',
 
 
-    ['玉佩'] = 'image\\背包\\装备\\玉佩.tga',
-    ['戒指'] = 'image\\背包\\装备\\戒指.tga',
-    ['腰带'] = 'image\\背包\\装备\\腰带.tga',
-    ['武器2']= 'image\\背包\\装备\\武器2.tga',
+    ['玉佩'] = 'image\\装备栏\\玉佩.tga',
+    ['戒指'] = 'image\\装备栏\\戒指.tga',
+    ['腰带'] = 'image\\装备栏\\腰带.tga',
+    ['武器2']= 'image\\装备栏\\武器2.tga',
 }
 
 equipment_bar_class = extends( panel_class , {
@@ -41,7 +41,7 @@ equipment_bar_class = extends( panel_class , {
         local height = (slot_size + offset) * 3
 
         --底层面板
-        local path = "image\\背包\\package-background.tga"
+        local path = "image\\装备栏\\equ_background.tga"
         
         --槽位背景
         local slot_path = "image\\背包\\package-lattice-back-0.tga"
@@ -286,7 +286,7 @@ ui.register_event('equipment',equipment.event)
 
 ui.equipment = equipment
 local function initialize()
-    local object = equipment_bar_class.create(200,200,96)
+    local object = equipment_bar_class.create(200,200,64)
     object:hide()
 
     equipment.ui = object

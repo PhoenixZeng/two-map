@@ -346,7 +346,7 @@ bag_class = extends( panel_class , {
         local slot_path = "image\\背包\\package-lattice-back-0.tga"
         
        
-        local panel = panel_class.create(path,x,y,520,760)
+        local panel = panel_class.create(path,x,y,max_width + offset,max_height + 170)
         --禁止鼠标穿透
         panel:add_button('',0,0,panel.w,panel.h):set_enable(false)
 
@@ -413,10 +413,10 @@ bag_class = extends( panel_class , {
 ]]
 
         --出售物品按钮 
-        panel.sell_button = panel:add_sell_button(240,oy,120,48)
+        panel.sell_button = panel:add_sell_button(max_width - 260,oy,120,42)
         
         --整理背包按钮  排序
-        panel.sort_button = panel:add_sort_button(380,oy,120,48)
+        panel.sort_button = panel:add_sort_button(max_width - 130,oy,120,42)
 
 
         --玩家金钱按钮 还有文本
@@ -1082,7 +1082,7 @@ ui.bag = bag
 
 local function initialize()
     local unit = unit_class.get_object(1)
-    local object = bag_class.create(1200,200,6,7,74)
+    local object = bag_class.create(1200,200,6,7,64)
     object:hide()
  
     object.unit = unit
