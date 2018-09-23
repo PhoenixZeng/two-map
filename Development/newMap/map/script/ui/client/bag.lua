@@ -288,7 +288,11 @@ item_class = {
     end,
 
     get_title = function (self)
-        local my_item = equipment.ui.item_map[self:get_type()]
+        local my_item 
+        if equipment.ui.unit ~= nil then 
+            my_item = equipment.ui.unit:get_equipment()[self:get_type()]
+        end 
+        
         local color = item_type_color[self:get_level_type()]
         local s = {}
 
@@ -859,7 +863,7 @@ bag_class = extends( panel_class , {
         end
 
       
-        local my_item = equipment.ui.item_map[item:get_type()]
+        local my_item = item.unit:get_equipment()[item:get_type()]
         button:item_tooltip(item,my_item)
         
         --print('鼠标进入',tostring(self))
@@ -1054,8 +1058,14 @@ end
 --鼠标指向物品事件
 bag.on_item_mouse_enter = function (item_handle)
     local item = bag.item_map[GetHandleId(item_handle)] 
+    
+    
     if item ~= nil then 
-        local my_item = equipment.ui.item_map[item:get_type()]
+        local my_item 
+        if equipment.ui.unit ~= nil then 
+            local map = equipment.ui.unit:get_equipment()
+            my_item = map[item:get_type()]
+        end 
         ui_base_class.item_tooltip(nil,item,my_item)
     end
 end 
