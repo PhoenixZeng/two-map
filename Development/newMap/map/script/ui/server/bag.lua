@@ -581,7 +581,7 @@ bag.init_bag = function (unit)
   
     unit.this_page = 1      --当前页面 初始为 1
     unit.max_page = 1       --最大页面 
-    unit.max_slot = 25      --槽位数量
+    unit.max_slot = 42      --槽位数量
     unit.bag = {}
     for i = unit.this_page,unit.max_page do
         unit.bag[i] = {}
