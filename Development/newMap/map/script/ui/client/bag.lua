@@ -927,9 +927,15 @@ bag.event = {
     on_select_unit = function (handle)
         local unit = unit_class.get_object(handle)
         bag.ui.unit = unit
+        equipment.ui.unit = unit 
         --如果是显示的 刷新
         if bag.ui.is_show then 
             bag.ui:update_page(unit)
+        end 
+
+        --如果装备栏是显示的 则刷新
+        if equipment.ui.is_show then 
+            equipment.ui:update(unit)
         end 
     end,
 

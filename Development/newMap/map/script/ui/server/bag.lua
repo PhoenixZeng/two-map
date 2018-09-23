@@ -404,6 +404,14 @@ unit_method = {
         return self.bag[page_id][slot_id]
     end,
 
+    get_equipment = function (self)
+        return self.equipment
+    end,
+
+    get_equipment_bar_item = function (self,slot_id)
+        return self:get_equipment()[slot_id]
+    end,
+
     open_bag = function (unit)
         local info = {
             type = 'bag',
@@ -583,6 +591,7 @@ bag.init_bag = function (unit)
     unit.max_page = 1       --最大页面 
     unit.max_slot = 42      --槽位数量
     unit.bag = {}
+    unit.equipment = {}
     for i = unit.this_page,unit.max_page do
         unit.bag[i] = {}
     end 

@@ -72,14 +72,14 @@ equipment_bar_class = extends( panel_class , {
             button:set_enable_drag(true) --设置按钮可拖动
 
 
-            --local text = button:add_text(type_name,0,0,button_size,button_size,15,'center')
+            local text = button:add_text("",0,0,slot_size,slot_size,15,'buttomright')
 
 
             button.item_type = type_name
             table.insert(panel.button_list,button)
             button.slot_id = #panel.button_list
 
-            --button.type_text = text
+            button.text = text
             button.texture = texture
             button.slot = slot
 
@@ -106,13 +106,22 @@ equipment_bar_class = extends( panel_class , {
         if button == nil then 
             return
         end
-        button.item = item
         item.equipment_slot_id = slot_id
-        self.item_map[slot_id] = item
-        self.item_map[item:get_type()] = item
+        local map = item.unit:get_equipment()
+        map[item:get_type()] = item
+        map[slot_id] = item 
 
-        button:set_normal_image(item:get_icon())
-        button.texture:set_normal_image(item:get_type_icon())
+        if self.unit == item.unit then 
+            button:set_normal_image(item:get_icon())
+            button.texture:set_normal_image(item:get_type_icon())
+
+            if item.count > 0 then 
+                button.text:set_text(tostring(item.count))
+            else
+                button.text:set_text('')
+            end
+
+        end 
         
         --button.type_text:set_text('')
     end,
@@ -142,9 +151,8 @@ equipment_bar_class = extends( panel_class , {
             print('该装备不能放在这个栏位。')
             return 
         end
-        local old_item = button.item 
+        local old_item = item.unit:get_equipment_bar_item(slot_id)
         self:create_item(item,slot_id)
-        self.unit = item.unit
         
         local info = {
             type = 'equipment',
@@ -172,7 +180,10 @@ equipment_bar_class = extends( panel_class , {
         if button == nil then 
             return
         end
-        local item = button.item
+
+        local map = self.unit:get_equipment()
+
+        local item = map[equipment_slot_id]
         if item == nil then
             return 
         end
@@ -186,13 +197,13 @@ equipment_bar_class = extends( panel_class , {
             slot_id = pos[1][2]
         end
         ui.bag.item_class.copy_create(self.unit,page_id,slot_id,item)
-        
-        self.item_map[slot_id] = nil
-        self.item_map[item:get_type()] = nil
-        button.item = nil
+    
+        map[equipment_slot_id] = nil
+        map[item:get_type()] = nil
+
         local icon = type_icon[type_table[equipment_slot_id]]
         button:set_normal_image(icon)
-        --button.type_text:set_text(button.item_type)
+        button.text:set_text("")
         button.texture:set_normal_image('')
 
         local info = {
@@ -206,7 +217,6 @@ equipment_bar_class = extends( panel_class , {
             }
         }
         ui.send_message(info)  
-
         return true
     end,
 
@@ -216,9 +226,40 @@ equipment_bar_class = extends( panel_class , {
             button:set_normal_image(icon)
             button:stop_animation()
             button.texture:set_normal_image('')
-            --button.type_text:set_text(button.item_type)
-            button.item = nil
         end
+    end,
+
+    update = function (self,unit)
+        local map = unit:get_equipment()
+        for index,button in ipairs(self.button_list) do 
+            local item = map[button.item_type]
+            local text = button.text
+            if item ~= nil then
+                button:set_normal_image(item:get_icon())
+                button.texture:set_normal_image(item:get_type_icon())
+
+                if item.count > 0 then 
+                    text:set_text(tostring(item.count))
+                else
+                    text:set_text('')
+                end
+                button:set_enable(item:is_enable())
+                button:set_enable_drag(item:is_enable())
+                if item:is_enable() == true then
+                    text:set_alpha(0xff) --设置透明
+                else
+                    text:set_alpha(0xff*0.5)  --设置透明
+                end
+
+            else
+                local icon = type_icon[button.item_type]
+                button.texture:set_normal_image('')
+                button:set_normal_image(icon)
+                text:set_text('')
+                text:set_alpha(0xff) --设置透明
+            end
+
+        end 
     end,
 
     --背包拖拽物品事件 跨界面拖拽物品 需要从坐标上判断拖拽的目标按钮
@@ -245,14 +286,20 @@ equipment_bar_class = extends( panel_class , {
     end,
     --拖放结束事件 拖动的按钮  目标按钮
     on_button_drag_and_drop = function (self,button,target_button)
-        if button.item == nil then 
+
+        if button.slot_id == nil or self.unit == nil then 
             return 
         end
+
+        local item = self.unit:get_equipment_bar_item(button.slot_id)
+        if item == nil then 
+            return 
+        end 
 
         local x,y = ui.get_mouse_pos()
         --拖回背包里
         if ui.bag.ui ~= nil and ui.bag.ui.is_show == true and ui.bag.ui:point_in_rect(x,y) then
-            ui.bag.ui:on_drag_bag_item(button.item,x,y)
+            ui.bag.ui:on_drag_bag_item(item,x,y)
         end
  
     end,
@@ -268,7 +315,10 @@ equipment_bar_class = extends( panel_class , {
 
     --指向事件 指向显示说明
     on_button_mouse_enter = function (self,button)
-        local item = button.item 
+        if button.slot_id == nil or self.unit == nil then 
+            return 
+        end 
+        local item = self.unit:get_equipment_bar_item(button.slot_id)
         if item == nil then 
             return
         end

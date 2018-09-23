@@ -20,6 +20,7 @@ unit_class = {
             self.max_page = 1       --最大页面 
             self.max_slot = 42      --槽位数量
             self.bag = {}
+            self.equipment = {}
             for i = self.this_page,self.max_page do
                 self.bag[i] = {}
             end 
@@ -30,6 +31,14 @@ unit_class = {
 
     get_bag = function (self)
         return self.bag
+    end,
+
+    get_equipment = function (self)
+        return self.equipment
+    end,
+
+    get_equipment_bar_item = function (self,slot_id)
+        return self:get_equipment()[slot_id]
     end,
 
     get_page = function (self,page_id)

@@ -1,12 +1,6 @@
 local bag = require 'ui.server.bag'
 local ui = require 'ui.server.util'
 local equipment = {}
-for i=1,12 do 
-    local player = ac.player(i)
-    player.equipment = {}
-end
-
-
 
 equipment.event = {
 
@@ -22,9 +16,10 @@ equipment.event = {
         if item == nil then 
             return 
         end
-        local old_item = player.equipment[equipment_slot_id]
+        local map = unit:get_equipment()
+        local old_item = map[equipment_slot_id]
 
-        player.equipment[equipment_slot_id] = item 
+        map[equipment_slot_id] = item 
         unit.bag[page_id][slot_id] = nil
         item.page_id = 0
         item.slot_id = 0
@@ -45,7 +40,8 @@ equipment.event = {
         if unit == nil then 
             return 
         end 
-        local item = player.equipment[equipment_slot_id]
+        local map = unit:get_equipment()
+        local item = map[equipment_slot_id]
         if item == nil then 
             return 
         end
@@ -56,7 +52,7 @@ equipment.event = {
         unit.bag[page_id][slot_id] = item
         item.page_id = page_id
         item.slot_id = slot_id
-        player.equipment[equipment_slot_id] = nil
+        map[equipment_slot_id] = nil
         item.equipment_slot_id = nil
         equipment.on_remove_equipment(unit,item)
     end,
