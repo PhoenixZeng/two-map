@@ -1,5 +1,5 @@
 local bag = require 'ui.server.bag'
-local unit = require 'types.unit'
+--local unit = require 'types.unit'
 local ui = require 'ui.server.util'
 local equipment = {}
 
@@ -25,8 +25,33 @@ equipment.event = {
         item.page_id = 0
         item.slot_id = 0
         item.equipment_slot_id = equipment_slot_id
+
+        
+        if GetLocalPlayer() ~= unit:get_owner().handle then 
+            --将单位装备物品同步给其他玩家
+            local player = item.player
+            item.player = nil 
+            item.unit = nil 
+
+            local info = {
+                type = 'equipment',
+                func_name = 'on_use_equipment',
+                params = {
+                    [1] = GetHandleId(unit.handle),
+                    [2] = item.equipment_slot_id,
+                    [3] = item,
+                }
+            }
+            ui.send_message(nil,info)
+
+            item.player = player 
+            item.unit = unit 
+        end
+
+
         equipment.on_use_equipment(unit,item)
         if old_item ~= nil then 
+            local equipment_slot_id = old_item.equipment_slot_id
             unit.bag[page_id][slot_id] = old_item
             old_item.page_id = page_id
             old_item.slot_id = slot_id
@@ -54,6 +79,27 @@ equipment.event = {
         item.page_id = page_id
         item.slot_id = slot_id
         map[equipment_slot_id] = nil
+        
+
+
+        if GetLocalPlayer() ~= unit:get_owner().handle then 
+            local player = item.player
+            item.player = nil 
+            item.unit = nil 
+            --将单位移除装备同步给其他玩家
+            local info = {
+                type = 'equipment',
+                func_name = 'on_remove_equipment',
+                params = {
+                    [1] = GetHandleId(unit.handle),
+                    [2] = item.equipment_slot_id,
+                }
+            }
+            ui.send_message(nil,info)
+
+            item.player = player 
+            item.unit = unit 
+        end
         item.equipment_slot_id = nil
         equipment.on_remove_equipment(unit,item)
     end,
@@ -102,6 +148,7 @@ local function set(unit,state,value)
     }
     ui.send_message(unit:get_owner().handle,info)
 end 
+
 --开一个计时器 定时发送玩家数据给客户端
 local timer = CreateTimer()
 TimerStart(timer,0.1,true,function ()

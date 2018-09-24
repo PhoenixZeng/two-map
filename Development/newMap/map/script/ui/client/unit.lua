@@ -10,6 +10,7 @@ unit_class = {
         if handle == nil then
             return
         end
+
         local unit = unit_class.unit_map[handle]
         if unit == nil then
             unit = {
@@ -29,6 +30,10 @@ unit_class = {
             setmetatable(unit,{__index = unit_class})
         end
         return unit
+    end,
+
+    get_handle = function (self)
+        return ConvertUnitState(self.handle)
     end,
 
     get_bag = function (self)

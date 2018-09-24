@@ -37,21 +37,10 @@ for i=0,11 do
     TriggerRegisterPlayerSelectionEventBJ(trg,Player(i),true)
 end
 TriggerAddAction(trg,function ()
+
     local unit = GetTriggerUnit()
     local player = GetTriggerPlayer()
-    local group = GetUnitsSelectedAll(player)
-    local count = CountUnitsInGroup(group)
-    GroupClear(group)
-    DestroyGroup(group)
 
-    if count > 1 then 
-        local info = {
-            type = 'bag',
-            func_name = 'on_close_bag',
-        }
-        ui.send_message(player,info)
-        return 
-    end 
     if GetOwningPlayer(unit) == player and IsUnitType(unit, UNIT_TYPE_HERO) then 
         local info = {
             type = 'bag',
@@ -63,6 +52,7 @@ TriggerAddAction(trg,function ()
         ui.send_message(player,info)
     end 
 end)
+
 
 function register_item_destroy_event(item_handle)
     local trg = CreateTrigger()

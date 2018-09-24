@@ -1,8 +1,12 @@
-local ui    = require 'ui.client.util'
-local game  = require 'ui.base.game'
-
+local ui            = require 'ui.client.util'
+local game          = require 'ui.base.game'
+local unit_class    = (require 'ui.client.unit').unit_class
 local equipment = {}
 local equipment_bar_class
+local target_equipment_bar_class
+
+
+
 local attribute = {
     '攻击', '护甲', '攻击间隔', '攻击速度', 
     '攻击范围',	'移动速度',	'减耗',	'冷却缩减',	'吸血',	'溅射',	
@@ -57,7 +61,7 @@ equipment_bar_class = extends( panel_class , {
         --禁止鼠标穿透
         panel:add_button('',0,0,panel.w,panel.h):set_enable(false)
    
-        local model = panel:add_sprite('HeroMountainKing2.mdx',100,0,panel.w,panel.h)
+        --local model = panel:add_sprite('HeroMountainKing2.mdx',100,0,panel.w,panel.h)
         --print(model.id)
         --dzapi.DzFrameSetScale(model.id,30)
         panel.title_button = panel:add_title_button('','装备栏',0,0,800,64)
@@ -369,20 +373,88 @@ equipment_bar_class = extends( panel_class , {
     
 })
 
+--继承装备栏
+target_equipment_bar_class = extends(equipment_bar_class,{
 
+    create = function (x,y,size) 
+        local panel = equipment_bar_class.create(x,y,size)
+        return extends(target_equipment_bar_class,panel)
+    end,
+    
+    show = function (self)
+        if self.unit ~= nil then 
+            self.title_button.text:set_text(GetUnitName(self.unit:get_handle()))
+        end 
+        equipment_bar_class.show(self)
+    end,
+    --屏蔽以下几个事件
+    on_drag_bag_item = function (self,item,x,y)
+    end,
+    on_button_drag_and_drop = function (self,button,target_button)
+    end,
+
+    on_button_right_clicked = function (self,button)
+    end,
+
+    --重写指向事件 指向对比说明
+    on_button_mouse_enter = function (self,button)
+        if button.slot_id == nil or self.unit == nil then 
+            return 
+        end 
+        local item = self.unit:get_equipment_bar_item(button.slot_id)
+        if item == nil then 
+            return
+        end
+        local my_item
+        if equipment.ui.unit ~= nil then 
+            my_item = equipment.ui.unit:get_equipment_bar_item(button.slot_id)
+        end 
+        button:item_tooltip(item,my_item)
+    end,
+})
 
 equipment.event = {
+    on_use_equipment = function (handle,slot_id,item)
+        local unit = unit_class.get_object(handle)
+        local type = type_table[slot_id]
 
+        item.unit = unit
+        setmetatable(item,{__index = ui.bag.item_class})
+        unit.equipment[type] = item 
+        unit.equipment[slot_id] = item
+
+    end,
+
+    on_remove_equipment = function (handle,slot_id)
+        local unit = unit_class.get_object(handle)
+        local type = type_table[slot_id]
+        unit.equipment[type] = nil 
+        unit.equipment[slot_id] = nil
+    end,
 }
 
 
 
 local ALT = false 
-
+local SelectUnit = nil
 equipment.on_key_down = function (code)
 
     if code == KEY.ALT then 
         ALT = true 
+        if SelectUnit ~= nil then 
+
+            if equipment.ui.unit == SelectUnit then 
+                equipment.ui:show() 
+            else 
+                equipment.target_ui.unit = SelectUnit
+                equipment.target_ui:show()
+
+            end 
+            
+        end 
+    elseif code == KEY.ESC then 
+        equipment.ui:hide()
+        equipment.target_ui:hide()
     end 
     if code == KEY.R and ALT then 
         if equipment.ui.unit ~= nil then 
@@ -403,6 +475,29 @@ equipment.on_key_up = function (code)
     end 
 end 
 
+-- 指向单位事件
+equipment.on_unit_mouse_enter = function (handle)
+
+    local handle_id = GetHandleId(handle)
+
+    SelectUnit = unit_class.unit_map[handle_id]
+    --按住alt键
+    if ALT and SelectUnit ~= nil  then 
+
+        if equipment.ui.unit == SelectUnit then 
+            equipment.ui:show()
+        else 
+            equipment.target_ui.unit = SelectUnit
+            equipment.target_ui:show()
+        end 
+    end 
+end 
+
+-- 离开单位事件
+equipment.on_unit_mouse_leave = function (handle)
+    SelectUnit = nil
+end
+
 
 
 ui.register_event('equipment',equipment.event)
@@ -414,6 +509,11 @@ local function initialize()
     object:hide()
 
     equipment.ui = object
+
+    local object = target_equipment_bar_class.create(1100,200,64)
+    object:hide()
+
+    equipment.target_ui = object
 
 
 end

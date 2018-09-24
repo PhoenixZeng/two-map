@@ -3,7 +3,7 @@ local ui            = require 'ui.client.util'
 local equipment     = require 'ui.client.equipment'
 local timer         = require 'ui.client.timer'
 local game          = require 'ui.base.game'
-local unit_class = (require 'ui.client.unit').unit_class
+local unit_class    = (require 'ui.client.unit').unit_class
 --背包类
 local bag_class
 
@@ -1085,21 +1085,7 @@ bag.on_item_clicked = function (item_handle)
 end
 
 bag.on_unit_clicked = function (unit_handle)
-    if bag.ui.unit == nil then 
-        return 
-    end 
-    if GetHandleId(unit_handle) ~= bag.ui.unit.handle then 
-        local info = {}
-        info.time = 0
-        timer.create(info,0.001,true,function (self,info)
-            SelectUnit(ConvertUnitState(bag.ui.unit.handle),true)
-            if info.time > 100 then 
-                self:stop()
-            else
-                info.time = info.time + 1
-            end
-        end)
-    end
+
 end
 
 local ALT = false 
@@ -1108,6 +1094,8 @@ bag.on_key_down = function (code)
 
     if code == KEY.ALT then 
         ALT = true 
+    elseif code == KEY.ESC then 
+        bag.ui:hide()
     end 
     if code == KEY.E and ALT then 
         if bag.ui.unit ~= nil then 
@@ -1131,6 +1119,7 @@ end
 ui.register_event('bag',bag.event)
 game.register_event(bag)
 ui.bag = bag
+ui.bag.item_class = item_class
 
 local function initialize()
     local unit = unit_class.get_object(1)

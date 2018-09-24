@@ -617,22 +617,11 @@ for i=1,10 do
     hero:add_item('衣服',10)
 end
 
-hero:add_restriction('无敌')
+--hero:add_restriction('无敌')
 
-local hero = ac.player(1):create_unit('Hpal',ac.point(400,300),30)
-bag.init_bag(hero)
 
-hero:add_item('酒',10)
-hero:add_item('面条',10)
-hero:add_item('酒',10)
-hero:add_item('羽毛',10)
-hero:add_item('和田玉',10)
-for i=1,10 do
-    hero:add_item('衣服',10)
-end
-
-local hero = ac.player(1):create_unit('Hpal',ac.point(400,300),30)
-hero:add_restriction('无敌')
+local hero = ac.player(2):create_unit('Hpal',ac.point(400,300),30)
+--hero:add_restriction('无敌')
 bag.init_bag(hero)
 
 hero:add_item('羽毛',10)
@@ -661,6 +650,7 @@ TimerStart(timer,0.5,true,function ()
         ui.send_message(player,info)
     end 
 end)
+
 ui.bag = bag 
 
 
