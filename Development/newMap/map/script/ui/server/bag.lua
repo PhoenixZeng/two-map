@@ -661,7 +661,7 @@ TimerStart(timer,0.5,true,function ()
         ui.send_message(player,info)
     end 
 end)
-
+ui.bag = bag 
 
 
 ui.register_event('bag',bag.event)

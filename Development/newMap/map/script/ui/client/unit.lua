@@ -129,9 +129,36 @@ unit_class = {
         return ui.bag.item_class.create(self,tbl[1][1],tbl[1][2],item_name,item_count)
     end,
 
+} 
+
+
+unit.event = {
+    on_sync_state = function (handle,name,value)
+        local unit = unit_class.get_object(handle)
+        unit.state[name] = handle
+        if ui.equipment.ui.unit == unit then 
+            ui.equipment.ui:update_state(unit)
+        end 
+    end,
+
+    on_sync_state_table = function (handle,tbl)
+        local unit = unit_class.get_object(handle)
+
+        for key,value in pairs(tbl) do 
+            unit.state[key] = value
+        end 
+
+        if ui.equipment.ui.unit == unit then 
+            ui.equipment.ui:update_state(unit)
+        end
+    end,
 }
+
 unit.unit_class = unit_class
 setmetatable(unit_class,hero_class)
+
+
+ui.register_event('unit',unit.event)
 
 
 return unit

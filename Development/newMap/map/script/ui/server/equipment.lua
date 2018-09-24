@@ -1,4 +1,5 @@
 local bag = require 'ui.server.bag'
+local unit = require 'types.unit'
 local ui = require 'ui.server.util'
 local equipment = {}
 
@@ -86,6 +87,45 @@ equipment.on_remove_equipment = function (unit,item)
     end
     print(unit.handle,'移除',item:get_name())
 end
+
+
+local function set(unit,state,value)
+    unit.old_set(unit,state,value)
+    local info = {
+        type = 'unit',
+        func_name = 'on_sync_state',
+        params = {
+            [1] = GetHandleId(unit.handle),
+            [2] = state,
+            [3] = value,
+        }
+    }
+    ui.send_message(unit:get_owner().handle,info)
+end 
+--开一个计时器 定时发送玩家数据给客户端
+local timer = CreateTimer()
+TimerStart(timer,0.1,true,function ()
+    for handle_id,unit in pairs(ui.bag.unit_map) do 
+        if unit.old_set == nil then 
+            unit.old_set = unit.set 
+            unit.set = set
+        end 
+        local state_table = {}
+        for index,name in ipairs(Table.ItemData['属性表'].attribute) do 
+            state_table[name] = unit:get(name)
+        end 
+        local info = {
+            type = 'unit',
+            func_name = 'on_sync_state_table',
+            params = {
+                [1] = GetHandleId(unit.handle),
+                [2] = state_table,
+            }
+        }
+        ui.send_message(nil,info)
+    end 
+end)
+
 
 local function initialize()
 

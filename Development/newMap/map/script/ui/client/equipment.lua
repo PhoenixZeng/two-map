@@ -3,6 +3,11 @@ local game  = require 'ui.base.game'
 
 local equipment = {}
 local equipment_bar_class
+local attribute = {
+    '攻击', '护甲', '攻击间隔', '攻击速度', 
+    '攻击范围',	'移动速度',	'减耗',	'冷却缩减',	'吸血',	'溅射',	
+    '格挡',	'格挡伤害',	'暴击',	'暴击伤害',	'破甲',	'穿透',	'护盾',
+}
 
 local type_table = {
     [1] = '项链' , [2] = '手镯' ,
@@ -47,7 +52,7 @@ equipment_bar_class = extends( panel_class , {
         local slot_path = "image\\背包\\package-lattice-back-0.tga"
 
         
-        local panel = panel_class.create(path,x,y,620,720)
+        local panel = panel_class.create(path,x,y,800,680)
 
         --禁止鼠标穿透
         panel:add_button('',0,0,panel.w,panel.h):set_enable(false)
@@ -55,7 +60,10 @@ equipment_bar_class = extends( panel_class , {
         local model = panel:add_sprite('HeroMountainKing2.mdx',100,0,panel.w,panel.h)
         --print(model.id)
         --dzapi.DzFrameSetScale(model.id,30)
-        panel.title_button = panel:add_title_button('','装备栏',0,0,620,64)
+        panel.title_button = panel:add_title_button('','装备栏',0,0,800,64)
+
+        --添加一个关闭按钮
+        panel.close_button = panel:add_close_button()
 
         local x = offset + 40
         local y = offset + 150
@@ -92,6 +100,16 @@ equipment_bar_class = extends( panel_class , {
                 x = slot_size + offset + 330
             end
         end
+
+        local text_map = {}
+        for index,name in pairs(attribute) do 
+            local y = index * 32 + 60
+            local title = panel:add_text(name .. ' : ',560,y,200,32,12,'left')
+            local text = panel:add_text('0',680,y,200,32,12,'left')
+            text_map[name] = text
+        end 
+        panel.text_map = text_map
+        
         panel.state_info_table = bind_state_table
         panel.state_tip_table = bind_tip_table
         bind_state_table = {}
@@ -100,6 +118,13 @@ equipment_bar_class = extends( panel_class , {
         return panel
     end,
 
+     --显示的时候刷新一下界面
+     show = function (self)
+        panel_class.show(self)
+        if self.unit ~= nil then 
+            self:update(self.unit)
+        end 
+    end,
 
     create_item = function (self,item,slot_id)
         local button = self.button_list[slot_id]
@@ -258,10 +283,26 @@ equipment_bar_class = extends( panel_class , {
                 text:set_text('')
                 text:set_alpha(0xff) --设置透明
             end
-
         end 
+        self:update_state(unit)
     end,
 
+    update_state = function (self,unit)
+        for index,name in pairs(attribute) do 
+            local text = self.text_map[name]
+            local value = unit.state[name]
+            if text ~= nil then 
+                if value == nil then 
+                    text:set_text('0')
+                else 
+                    --格式化字符串 只保留小数点后2位数字
+                    local str = string.format('%.2f',value)
+                    text:set_text(str)
+                end 
+            end 
+        end
+    end,
+    
     --背包拖拽物品事件 跨界面拖拽物品 需要从坐标上判断拖拽的目标按钮
     on_drag_bag_item = function (self,item,x,y)
         local button = nil
